@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>User Search</title>
+<meta name="viewport" content="width=device-width">
+<style>
+  body { margin: 2em; text-align: center; }
+  form { margin-bottom: 2em; }
+  table { text-align: left; margin: 0 auto; }
+  th, td { padding: .2em; }
+</style>
+</head>
+
+<body>
+<div id="container">
+
+<form>
+  <input id="search" type="search" name="search" placeholder="Search for a location" data-bind="value: query, valueUpdate: 'keyup'" autocomplete="off" />
+</form>
+
+<table data-bind="visible: locs().length > 0">
+  <thead><tr><th>Name</th><th>Note</th></tr></thead>
+  <tbody data-bind="foreach: locs">
+    <tr>
+      <td data-bind="text: name"></td>
+      <td data-bind="text: note"></td>
+    </tr>    
+  </tbody>
+</table>
+</div>
+
+<script src="http://knockoutjs.com/downloads/knockout-3.2.0.js"></script>
+<script>
+var locs = [
+           {name : "Earth City Missouri", zipcode: "63045", note: "My Work", visible: "True"},
+           {name : "Lemay Missouri", zipcode: "63125", note:  "My Home", visible: "True"},
+           {name : "St Louis Missouri", zipcode: "63111", note:  "In Laws", visible: "True"},
+           {name : "Ofallon Missouri", zipcode: "63366", note:  "High School", visible: "True"},
+           {name : "Kirksville Missouri", zipcode: "63501", note:  "Birth", visible: "True"}
+      ];
+
+
+var viewModel = {
+  locs: ko.observableArray([]),
+  query: ko.observable(''),
+
+  search: function(value) {
+    viewModel.locs.removeAll();
+
+    for (var loc in locs) {
+      if (locs[loc].name.toLowerCase().indexOf(value.toLowerCase()) >= 0) {
+        viewModel.locs.push(locs[loc]);
+      }
+    }
+  }
+ };
+
+
+   // load initial list of locs
+  for (var loc in locs) {      
+      viewModel.locs.push(locs[loc]);
+  };
+
+viewModel.query.subscribe(viewModel.search);
+ko.applyBindings(viewModel);
+</script>
+</body>
+</html>
