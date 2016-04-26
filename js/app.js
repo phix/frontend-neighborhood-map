@@ -44,10 +44,8 @@ var viewModel = function(){
   for (var loc in locs) {    
 	  self.locs.push(locs[loc]);
 	  addMarker(loc);
-      var infoWindow = new google.maps.InfoWindow({         
-      });
-  }
 
+  }
 
 	function addMarker(loc) {
 	    var marker = new google.maps.Marker({
@@ -58,13 +56,31 @@ var viewModel = function(){
 
 		markersArray.push(marker);
         google.maps.event.addListener( marker, 'click', function() {
+        	var currentMarker = this;        	
         	if(marker.info){
         		marker.info.close();
         	}
         	marker.setAnimation(google.maps.Animation.BOUNCE);
 			setTimeout(function(){ marker.setAnimation(null); }, 750);
-			infoWindow.setContent(get4Square(loc));
-			infoWindow.open(map,this);           
+
+			$.ajax({ 
+		    type: 'GET', 
+		    url: fourSquareConfig.apiUrl + 'v2/venues/' + locs[loc].venue + '?client_id=' + fourSquareConfig.client_id + '&client_secret='+ fourSquareConfig.client_secret  + '&v=' + fourSquareConfig.version, 
+		    dataType: 'json',
+		    success: function (data) { 
+		    	 var infoWindow = new google.maps.InfoWindow({   });
+		       	 var myVenue = data.response.venue;
+		    		tempOutput = infoWindowTemplate;
+		    		infoWindow.setContent(tempOutput.replace("venueid", myVenue.id).replace("venuename", myVenue.name).replace("venueaddress", myVenue.location.formattedAddress));
+		    		infoWindow.open(map,currentMarker);
+		        },
+	        error: function(errMsg){
+	        	var infoWindow = new google.maps.InfoWindow({   });
+	        	infoWindow.setContent("A critical error has occured");
+	        	infoWindow.open(map,currentMarker); 
+	        	}
+		    });			
+			          
         });
 	}
 
@@ -76,26 +92,6 @@ var viewModel = function(){
 	    markersArray.length = 0;
 	    }
 	}
-
-	function get4Square(loc){
-		output = "An error has Occured";
-		$.getJSON({
-		    url: fourSquareConfig.apiUrl + 'v2/venues/' + locs[loc].venue + '?client_id=' + fourSquareConfig.client_id + '&client_secret='+ fourSquareConfig.client_secret  + '&v=' + fourSquareConfig.version,
-		    dataType: "json",
-		    async: false,
-		    success: function(data){
-		    	var myVenue = data.response.venue;
-		    	tempOutput = infoWindowTemplate;
-		    	output = tempOutput.replace("venueid", myVenue.id).replace("venuename", myVenue.name).replace("venueaddress", myVenue.location.formattedAddress);
-		    	
-		    },
-		    failure: function(errMsg) {
-		        output = "A critical error has occured";
-		    }
-		});
-		return output;
-	}
-
 
   self.search = function(value) {
   	removeMarker();
@@ -110,4 +106,10 @@ var viewModel = function(){
 
   self.query.subscribe(self.search);
  };
+
+    function gmapsError(){
+    	document.getElementById("mapDiv").innerHTML  = "Cannot connect to Google Maps, please try again later";
+    	alert("Cannot connect to Google Maps, please try again later");
+    }
+
 
