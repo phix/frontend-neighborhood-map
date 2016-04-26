@@ -37,7 +37,6 @@ var viewModel = function(){
 	
   self.activateMarker = function(loc) {
   	  $('#listModal').modal('toggle');
-	  //alert(loc.marker);
 	  google.maps.event.trigger(markersArray[loc.marker], 'click');
   };
 
@@ -47,7 +46,7 @@ var viewModel = function(){
 	  addMarker(loc);
       var infoWindow = new google.maps.InfoWindow({         
       });
-  };
+  }
 
 
 	function addMarker(loc) {
@@ -107,7 +106,7 @@ var viewModel = function(){
         addMarker(loc);
       }
     }
-  }
+  };
 
   self.query.subscribe(self.search);
  };
